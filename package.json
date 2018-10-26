@@ -1,5 +1,5 @@
 {
-  "name": "pine-tree",
+  "name": "@givengine/pine-tree",
   "version": "0.3.0",
   "description": "Pine Tree, a GIVE Tree implementation with fixed interval, low-resolution summary support.",
   "main": "index.js",
