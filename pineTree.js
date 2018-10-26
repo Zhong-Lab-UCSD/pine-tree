@@ -35,10 +35,10 @@ const logger = log4js.getLogger('givengine')
  * @property {function} _SummaryCtor - The constructor for a data
  *    summary object.
  * @property {GiveTreeNode} _NonLeafNodeCtor - Constructor for all non-leaf
- *    nodes. Should be `GIVE.PineNode` all the time. Can be overridden but not
+ *    nodes. Should be `PineNode` all the time. Can be overridden but not
  *    recommended.
  * @property {GiveTreeNode} _LeafNodeCtor - Constructor for all leaf nodes,
- *    `GIVE.DataNode` by default
+ *    `GiveTreeNS.DataNode` by default
  *
  * @class
  */
@@ -50,14 +50,13 @@ class PineTree extends GiveTreeNS.GiveTree {
    *    will be responsible for.
    * @param {object} props - properties that will be passed to the individual
    *    implementations
-   * @param {number} props.scalingFactor - for `this.scalingFactor`
-   * @param {number} props.leafScalingFactor - for `this.leafScalingFactor`
-   * @param {function} props._SummaryCtor - for `this._SummaryCtor`
-   * @param {number} props.lifeSpan - for `this.lifeSpan`
-   * @param {function} props.NonLeafNodeCtor - used to override non-leaf node
+   * @param {number} [props.scalingFactor] - for `this.scalingFactor`
+   * @param {number} [props.leafScalingFactor] - for `this.leafScalingFactor`
+   * @param {function} [props._SummaryCtor] - for `this._SummaryCtor`
+   * @param {function} [props.NonLeafNodeCtor] - used to override non-leaf node
    *    constructors.
-   * @param {function} props.LeafNodeCtor - if omitted, the constructor of
-   *    `GIVE.DataNode` will be used
+   * @param {function} [props.LeafNodeCtor] - if omitted, the constructor of
+   *    `GiveTreeNS.DataNode` will be used
    * @memberof PineTree
    */
   constructor (chrRange, props) {
@@ -103,8 +102,8 @@ class PineTree extends GiveTreeNS.GiveTree {
    *    the chromosomal range that `data` corresponds to.
    * @param {number} [chrRange.resolution] - the resolution of the data being
    *    inserted. Will override `props.resolution` if both exists.
-   * @param {Array<ChromRegion>} continuedList
-   * @param {Array<ChromRegion>} [props.contList] - the list of data
+   * @param {object} [props] - additional properties being passed onto nodes
+   * @param {Array<ChromRegion>} [props.continuedList] - the list of data
    *    entries that should not start in `chrRange` but are passed from the
    *    earlier regions, this will be useful for later regions if date for
    *    multiple regions are inserted at the same time
@@ -138,12 +137,12 @@ class PineTree extends GiveTreeNS.GiveTree {
    * @param {function} callback - the callback function to be used (with the
    *    data entry as its sole parameter) on all overlapping data entries
    *    (that pass `filter` if it exists).
-   * @param {function} filter - the filter function to be used (with the data
+   * @param {function} [filter] - the filter function to be used (with the data
    *    entry as its sole parameter), return `false` to exclude the entry from
    *    being called with `callback`.
-   * @param {boolean} breakOnFalse - whether the traversing should break if
+   * @param {boolean} [breakOnFalse] - whether the traversing should break if
    *    `false` has been returned from `callback`
-   * @param {object|null} props - additional properties being passed onto nodes
+   * @param {object} [props] - additional properties being passed onto nodes
    * @param {number} [props.resolution] - the resolution that is required,
    *    data entry (or summary entries) that can just meet this requirement will
    *    be chosen. Smaller is finer. Will be overridden by `chrRange.resolution`
@@ -165,11 +164,11 @@ class PineTree extends GiveTreeNS.GiveTree {
    *    cached range. 1 is finest. This is recommended in case of mixed
    *    resolutions for different `chrRange`s, This will override
    *    `props.resolution` if both exist.
-   * @param {object|null} props - additional properties being passed onto nodes
-   * @param {number|null} [props.resolution] - the resolution that is required.
+   * @param {object} [props] - additional properties being passed onto nodes
+   * @param {number} [props.resolution] - the resolution that is required.
    *    Smaller is finer. Will be overridden by `chrRange.resolution` if both
    *    exists.
-   * @param {number|null} [props.bufferingRatio] - the ratio to 'boost'
+   * @param {number} [props.bufferingRatio] - the ratio to 'boost'
    *    `resolution` so that less data fetching may be needed.
    * @returns {Array<ChromRegion>} the chromosomal ranges that do not
    *    have their data ready in this data storage unit (therefore need to be
