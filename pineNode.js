@@ -13,6 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * @module PineNode
  */
 
 const GiveTreeNS = require('@givengine/give-tree')
@@ -29,7 +31,6 @@ const logger = log4js.getLogger('givengine')
  *
  * See `GiveNonLeafNode` for common non-leaf node documentation.
  *
- * @typedef {object} PineNode
  * @property {boolean} isRoot
  * @property {Array<number>} keys
  * @property {Array<GiveTreeNode|null|boolean>} values
@@ -46,25 +47,21 @@ const logger = log4js.getLogger('givengine')
  *    (`DataNode`) shall cover 100bp.
  * @property {function|null} tree._SummaryCtor - The constructor for a data
  *    summary.
- * @property {object|null} _summary - The data summary for this node.
+ * @property {Object|null} _summary - The data summary for this node.
  *
- * @class PineNode
+ * @class
+ * @alias module:PineNode
  *
+ * @param {Object} props
+ * @param {GiveTree} props.tree - for `this.tree`
+ * @param {boolean} props.isRoot
+ * @param {number} [props.start]
+ * @param {number} [props.end]
+ * @param {number} [props.reverseDepth]
+ * @param {Array<number>} [props.keys] - for `this.keys`
+ * @param {Array<GiveTreeNode>} [props.values] - for `this.values`
  */
 class PineNode extends GiveTreeNS.GiveNonLeafNode {
-  /**
-   * Creates an instance of PineNode.
-   * @constructor
-   * @param {object} props
-   * @param {GiveTree} props.tree - for `this.tree`
-   * @param {boolean} props.isRoot
-   * @param {number} [props.start]
-   * @param {number} [props.end]
-   * @param {number} [props.reverseDepth]
-   * @param {Array<number>} [props.keys] - for `this.keys`
-   * @param {Array<GiveTreeNode>} [props.values] - for `this.values`
-   * @memberof PineNode
-   */
   constructor (props) {
     super(...arguments)
 
@@ -87,7 +84,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * childHasData - whether the data of the child node is there
+   * Whether the data of the child node is there
    *
    * @param  {number} index - index of the child node
    * @returns {boolean} - `true` if the data is ready, `false` if not.
@@ -98,7 +95,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * _getResolutionAtDepth - get the resolution of any data node given the
+   * Get the resolution of any data node given the
    *    reversed depth of the node.
    *
    * @param {number} revDepth - the reversed depth of the node.
@@ -111,17 +108,17 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * getResolution - get the resolution of this data node
+   * Get the resolution of this data node (span of the node),
+   *    `1` is the smallest (finest).
    *
-   * @returns {number}  Return the resolution (span of the node),
-   *    1 is the smallest (finest)
+   * @type {number}
    */
   get resolution () {
     return this._getResolutionAtDepth(this.reverseDepth)
   }
 
   /**
-   * getChildResolution - get the resolution of a child data node
+   * Get the resolution of a child data node
    *
    * @param  {number} [index] - index of the child node, if not provided, then
    *    return the supposed child resolution (because it should be fixed in
@@ -146,7 +143,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * resolutionEnough - get whether the resolution of this data node is enough
+   * Get whether the resolution of this data node is enough
    *    for the given resolution requirement.
    *
    * @param  {number} [resolution] - the resolution required, if not provided,
@@ -161,7 +158,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * childResolutionEnough - get whether the resolution of a child is enough
+   * Get whether the resolution of a child is enough
    *    for the given resolution requirement.
    *
    * @param  {number} [resolution] - the resolution required, if not provided,
@@ -179,7 +176,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * _getClosestResolution - get the closest resolution that is adequate for the
+   * Get the closest resolution that is adequate for the
    *    required resolution.
    *
    * @param {number} requiredRes - the required resolution.
@@ -197,7 +194,8 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * fitResolution - fit coordinates to resolution requirements.
+   * Fit coordinates to resolution requirements.
+   *
    *    This is mainly used in cases when a value is put into a series of
    *    consecutive bins of `resolution` size, and we need to find the
    *    boundary of the bin. For example, if we put 12 into bins of 10, then
@@ -205,7 +203,6 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
    *    boundary or the upper one.
    *
    * @static
-   * @memberof PineNode
    * @param  {number} value - value to be fitted
    * @param  {number} resolution - resolution that needs to be fitted, *i.e.*
    *    bin size.
@@ -224,7 +221,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * updateSummary - Update the summary data within this node
+   * Update the summary data within this node
    *
    * @param  {ChromRegion} [chromEntry] - if known summaries exist in the
    *    data entry, replace current summary with the new one.
@@ -283,19 +280,18 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * getSummaryData - get the summary data of `this`
+   * The summary data of `this`, or `null`
    *
-   * @returns {_SummaryCtor|null}  the summary data, or `null`
+   * @type {_SummaryCtor|null}
    */
   get summary () {
     return this._summary
   }
 
   /**
-   * getSummaryChromRegion - get a `ChromRegion` object including the summary
+   * Get a `ChromRegion` object including the summary
    *    data of `this` as its `._summary` property.
    *
-   * @param {string} chr - chromosome for the `ChromRegion` object
    * @returns {ChromRegion|null}  the `ChromRegion` object, or `null`
    */
   get summaryChromRegion () {
@@ -303,28 +299,31 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * insert - Insert data under this node
-   * @memberof PineNode.prototype
+   * Insert data under this node
    *
    * @param {Array<ChromRegion>} data - the sorted array of data
    *    entries (each should be an extension of `ChromRegion`).
    *    `data === null` or `data === []` means there is no data in
    *    `chrRange` and `false`s will be used in actual storage.
+   *
    *    __NOTICE:__ any data overlapping `chrRange` should appear either
    *    here or in `continuedList`, otherwise `continuedList` in data
    *    entries may not work properly.
+   *
    *    After insertion, any entry within `data` that overlaps `chrRange`
    *    will be deleted from the array.
    * @param {ChromRegion} chrRange - the chromosomal range that
    *    `data` corresponds to.
+   *
    *    This is used to mark the empty regions correctly. No `null` will
    *    present within these regions after this operation.
+   *
    *    This parameter should be a `ChromRegion` object.
    * @param {number} [chrRange.resolution] - the resolution provided for the
    *    insertion. 1 is finest. This is used in case of mixed resolutions
    *    for different `chrRange`s, This will override `props.resolution` if
    *    both exist.
-   * @param {object} [props] - additional properties being passed onto
+   * @param {Object} [props] - additional properties being passed onto
    *    nodes.
    * @param {Array<ChromRegion>} [props.continuedList] - the list of data
    *    entries that should not start in `chrRange` but are passed from the
@@ -339,7 +338,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
    *    leaf nodes if they are not the same as the non-leaf nodes.
    * @returns {GiveNonLeafNode|boolean}
    *    This shall reflect whether auto-balancing is supported for the tree.
-   *    See `GiveNonLeafNode.prototype._restructure` for details.
+   *    See `GiveNonLeafNode.prototype.restructure` for details.
    */
   insert (data, chrRange, props) {
     props = props || {}
@@ -402,7 +401,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
     } else { // chrRange
       throw (new Error(chrRange + ' is not a valid chrRegion.'))
     } // end if(chrRange)
-    return this._restructure()
+    return this.restructure()
   }
 
   _addNonLeafRecords (data, chrRange, props) {
@@ -606,7 +605,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
     props = props || {}
     // Check whether `this` shall be removed
     if (this.start === data.start && this.end === data.end) {
-      if (!exactMatch || this._compareData(data, this)) {
+      if (!exactMatch || this.constructor._compareData(data, this)) {
         // remove content of this
         if (typeof props.callback === 'function') {
           props.callback(this)
@@ -637,7 +636,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * traverse - traverse all nodes / data entries within `this` and calling
+   * Traverse all nodes / data entries within `this` and calling
    *    functions on them. Pine tree nodes need to implement resolution
    *    support.
    *
@@ -656,7 +655,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
    *    the region should be included in traverse.
    * @param  {boolean} [breakOnFalse] - whether the traverse should be stopped
    *    if `false` is returned from the callback function.
-   * @param  {object} [props] - additional properties being
+   * @param  {Object} [props] - additional properties being
    *    passed onto nodes.
    * @param  {boolean} [props.notFirstCall] - whether this is not the first
    *    call of a series of `traverse` calls.
@@ -671,12 +670,12 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
       // Rejuvenate `this`
       if (this.start < chrRange.end && this.end > chrRange.start) {
         // Resolution support: check if the resolution is already enough in
-        // this node. If so, call `this._callFuncOnDataEntry` on
+        // this node. If so, call `this.constructor._callFuncOnDataEntry` on
         // `this.summaryChromRegion`
         if (this.resolutionEnough(resolution) && this.hasData) {
           // Resolution enough
-          return this._callFuncOnDataEntry(callback, filter, breakOnFalse,
-            this.summaryChromRegion, props, ...args
+          return this.constructor._callFuncOnDataEntry(callback, filter,
+            breakOnFalse, this.summaryChromRegion, props, ...args
           )
         } else {
           // call `GiveNonLeafNode.prototype.traverse`
@@ -690,15 +689,15 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * getUncachedRange - Return an array of chrRegions that does not have
-   *    data loaded to allow buffered loading of data
+   * Return an array of chrRegions that does not have
+   *    data loaded to allow buffered loading of data.
    *
    * @param  {ChromRegion} chrRange - The range of query.
    * @param  {number} [chrRange.resolution] - the resolution required for the
    *    uncached range. 1 is finest. This is used in case of mixed
    *    resolutions for different `chrRange`s, This will override
    *    `props.resolution` if both exist.
-   * @param  {object} [props] - additional properties being passed onto
+   * @param  {Object} [props] - additional properties being passed onto
    *    nodes
    * @param  {number} [props.resolution] - resolution required for the
    *    query, will be overridden by `chrRange.resolution` if both exist.
@@ -712,9 +711,11 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
    *    usage and GC.
    * @returns {Array<ChromRegion>} An ordered array of the regions that
    *    does not have the data at the current resolution requirement.
+   *
    *    __Regions will have a `.resolution` property indicating their
    *    intended resolutions. This shall be observed by the server so that
    *    summary of data shall work.__
+   *
    *    If no non-data ranges are found, return []
    */
   getUncachedRange (chrRange, props) {
@@ -782,7 +783,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * hasUncachedRange - Quickly check if the node has any uncached range
+   * Quickly check if the node has any uncached range
    *    within a specific range.
    *
    * @param  {ChromRegion} chrRange - The range of query.
@@ -790,7 +791,7 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
    *    uncached range. 1 is finest. This is used in case of mixed
    *    resolutions for different `chrRange`s, This will override
    *    `props.resolution` if both exist.
-   * @param  {object} [props] - additional properties being passed onto
+   * @param  {Object} [props] - additional properties being passed onto
    *    nodes
    * @param  {number} [props.resolution] - resolution required for the
    *    query, will be overridden by `chrRange.resolution` if both exist.
@@ -830,11 +831,11 @@ class PineNode extends GiveTreeNS.GiveNonLeafNode {
   }
 
   /**
-   * isEmpty - return whether this node is empty
-   * If there is no entry in both `this.startList` and `this.continuedList` then
-   *    the node is considered empty.
+   * Whether this node is empty.
+   * If there is no child with data, nor is there any summary data, the node is
+   * considered empty.
    *
-   * @returns {boolean}      whether the node is empty
+   * @type {boolean}
    */
   get isEmpty () {
     return !this.hasData && super.isEmpty

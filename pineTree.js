@@ -13,6 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * @module PineTree
  */
 
 const GiveTreeNS = require('@givengine/give-tree')
@@ -26,10 +28,12 @@ const logger = log4js.getLogger('givengine')
  * See `GiveTree` in `@givengine/give-tree` for other properties and methods.
  * @property {number} scalingFactor - The scaling factor for the pine
  *    tree.
+ *
  *    This is the factor for non-leaf nodes (this will be used to initialize
  *    `this.tree.leafScalingFactor` if the latter is not initialized.).
  * @property {number} leafScalingFactor - The scaling factor for the
  *    leaf nodes of the pine tree.
+ *
  *    For example, if `this.tree.leafScalingFactor === 100`, each leaf node
  *    (`give.DataNode`) shall cover 100bp.
  * @property {function} _SummaryCtor - The constructor for a data
@@ -41,24 +45,22 @@ const logger = log4js.getLogger('givengine')
  *    `GiveTreeNS.DataNode` by default
  *
  * @class
- */
+ * @alias module:PineTree
+ * @implements {GiveTree}
+ *
+ * @param {ChromRegion} chrRange - The range this data storage unit
+ *    will be responsible for.
+ * @param {Object} props - properties that will be passed to the individual
+ *    implementations
+ * @param {number} [props.scalingFactor] - for `this.scalingFactor`
+ * @param {number} [props.leafScalingFactor] - for `this.leafScalingFactor`
+ * @param {function} [props._SummaryCtor] - for `this._SummaryCtor`
+ * @param {function} [props.NonLeafNodeCtor] - used to override non-leaf node
+ *    constructors.
+ * @param {function} [props.LeafNodeCtor] - if omitted, the constructor of
+ *    `GiveTreeNS.DataNode` will be used
+*/
 class PineTree extends GiveTreeNS.GiveTree {
-  /**
-   * @constructor
-   * @implements {GiveTree}
-   * @param {ChromRegion} chrRange - The range this data storage unit
-   *    will be responsible for.
-   * @param {object} props - properties that will be passed to the individual
-   *    implementations
-   * @param {number} [props.scalingFactor] - for `this.scalingFactor`
-   * @param {number} [props.leafScalingFactor] - for `this.leafScalingFactor`
-   * @param {function} [props._SummaryCtor] - for `this._SummaryCtor`
-   * @param {function} [props.NonLeafNodeCtor] - used to override non-leaf node
-   *    constructors.
-   * @param {function} [props.LeafNodeCtor] - if omitted, the constructor of
-   *    `GiveTreeNS.DataNode` will be used
-   * @memberof PineTree
-   */
   constructor (chrRange, props) {
     props.LeafNodeCtor = props.LeafNodeCtor || GiveTreeNS.DataNode
     super(chrRange, props.NonLeafNodeCtor || PineNode, props)
@@ -93,23 +95,23 @@ class PineTree extends GiveTreeNS.GiveTree {
   }
 
   /**
-   * _insertSingleRange - Insert data entries within a single range
+   * Insert data entries within a single range.
+   *
    * Please refer to `this.insert` for parameter annotation
-   * @memberof GiveTreeBase.prototype
    *
    * @param {Array<ChromRegion>} data
    * @param {ChromRegion|null} chrRange -
    *    the chromosomal range that `data` corresponds to.
    * @param {number} [chrRange.resolution] - the resolution of the data being
    *    inserted. Will override `props.resolution` if both exists.
-   * @param {object} [props] - additional properties being passed onto nodes
+   * @param {Object} [props] - additional properties being passed onto nodes
    * @param {Array<ChromRegion>} [props.continuedList] - the list of data
    *    entries that should not start in `chrRange` but are passed from the
    *    earlier regions, this will be useful for later regions if date for
    *    multiple regions are inserted at the same time
    * @param {function} [props.callback] - the callback function to be used
    *    (with the data entry as its sole parameter) when inserting
-   * @param {object} [props.ThisVar] - `this` used in calling
+   * @param {Object} [props.ThisVar] - `this` used in calling
    *    `props.callback`.
    * @param {function} [props.LeafNodeCtor] - the constructor function of
    *    leaf nodes if they are not the same as the non-leaf nodes.
@@ -125,9 +127,8 @@ class PineTree extends GiveTreeNS.GiveTree {
   }
 
   /**
-   * traverse - traverse given chromosomal range to apply functions to all
+   * Traverse given chromosomal range to apply functions to all
    * overlapping data entries.
-   * @memberof GiveTreeBase.prototype
    *
    * @param {ChromRegion} chrRanges - the chromosomal range to traverse
    * @param {number} [chrRange.resolution] - the resolution required for the
@@ -142,7 +143,7 @@ class PineTree extends GiveTreeNS.GiveTree {
    *    being called with `callback`.
    * @param {boolean} [breakOnFalse] - whether the traversing should break if
    *    `false` has been returned from `callback`
-   * @param {object} [props] - additional properties being passed onto nodes
+   * @param {Object} [props] - additional properties being passed onto nodes
    * @param {number} [props.resolution] - the resolution that is required,
    *    data entry (or summary entries) that can just meet this requirement will
    *    be chosen. Smaller is finer. Will be overridden by `chrRange.resolution`
@@ -155,16 +156,15 @@ class PineTree extends GiveTreeNS.GiveTree {
   }
 
   /**
-   * getUncachedRange - get an array of chrRegions that do not have data ready.
+   * Get an array of chrRegions that do not have data ready.
    * This is used for sectional loading.
-   * @memberof PineTree.prototype
    *
    * @param {ChromRegion} chrRange - the chromosomal range to query
    * @param  {number} [chrRange.resolution] - the resolution required for the
    *    cached range. 1 is finest. This is recommended in case of mixed
    *    resolutions for different `chrRange`s, This will override
    *    `props.resolution` if both exist.
-   * @param {object} [props] - additional properties being passed onto nodes
+   * @param {Object} [props] - additional properties being passed onto nodes
    * @param {number} [props.resolution] - the resolution that is required.
    *    Smaller is finer. Will be overridden by `chrRange.resolution` if both
    *    exists.
@@ -174,6 +174,7 @@ class PineTree extends GiveTreeNS.GiveTree {
    *    have their data ready in this data storage unit (therefore need to be
    *    fetched from sources). If all the data needed is ready, `[]` will be
    *    returned.
+   *
    *    Every returned chromosomal range will also have its corrsponding
    *    resolution in its `.resolution` property.
    */
@@ -188,11 +189,15 @@ class PineTree extends GiveTreeNS.GiveTree {
  */
 
 /**
- * _DEFAULT_SCALING_FACTOR - Default value for scalingFactor
+ * Default value for scalingFactor
+ * @static
+ * @type {number}
  */
 PineTree._DEFAULT_SCALING_FACTOR = 20
 /**
- * _DEFAULT_LEAF_SCALING_FACTOR - Default value for leafScalingFactor
+ * Default value for leafScalingFactor
+ * @static
+ * @type {number}
  */
 PineTree._DEFAULT_LEAF_SCALING_FACTOR = 100
 
